@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raspberry Pi Remote Control</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #c51f4e;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #c51f4e;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #a81a42;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        .success {
+            color: #155724;
+            background-color: #d4edda;
+        }
+        .error {
+            color: #721c24;
+            background-color: #f8d7da;
+        }
+        .loading {
+            color: #0c5460;
+            background-color: #d1ecf1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Raspberry Pi Remote Access</h1>
+        
+        <div class="input-group">
+            <label for="piIp">Pi IP Address:</label>
+            <input type="text" id="piIp" placeholder="192.168.1.100">
+        </div>
+        
+        <div class="input-group">
+            <label for="piPort">VNC Port (default is 5900):</label>
+            <input type="text" id="piPort" placeholder="5900" value="5900">
+        </div>
+        
+        <button id="connectBtn">Connect via VNC</button>
+        <button id="scanBtn">Scan Network for Pi</button>
+        
+        <div id="status">Enter your Pi's IP address or scan your network.</div>
+    </div>
+
+    <script>
+        document.getElementById("connectBtn").addEventListener("click", function() {
+            const piIp = document.getElementById("piIp").value.trim();
+            const piPort = document.getElementById("piPort").value.trim() || "5900";
+            const status = document.getElementById("status");
+            
+            if (!piIp) {
+                status.innerHTML = "⚠️ Please enter a valid IP address";
+                status.className = "error";
+                return;
+            }
+
+            status.innerHTML = "⌛ Attempting to connect to " + piIp + "...";
+            status.className = "loading";
+            
+            // Try to open VNC link
+            try {
+                const vncLink = `vnc://${piIp}:${piPort}`;
+                window.location.href = vncLink;
+                
+                // Fallback instructions
+                setTimeout(() => {
+                    status.innerHTML = `
+                        <p>If VNC didn't open automatically:</p>
+                        <p><strong>1.</strong> Open your VNC viewer (RealVNC, TightVNC, etc.)</p>
+                        <p><strong>2.</strong> Connect to: <code>${piIp}:${piPort}</code></p>
+                        <p><strong>3.</strong> Use your Pi's VNC credentials</p>
+                    `;
+                    status.className = "success";
+                }, 2000);
+            } catch (e) {
+                status.innerHTML = "❌ Error: " + e.message;
+                status.className = "error";
+            }
+        });
+
+        // Simple network scanner (works only for responsive Pis)
+        document.getElementById("scanBtn").addEventListener("click", function() {
+            const status = document.getElementById("status");
+            status.innerHTML = "⌛ Scanning local network for Raspberry Pi...";
+            status.className = "loading";
+            
+            // This is a mock scan - in reality you'd need a backend service
+            setTimeout(() => {
+                status.innerHTML = `
+                    <p>Network scan complete (mock results):</p>
+                    <p>Possible Pi devices found:</p>
+                    <ul>
+                        <li><a href="#" onclick="document.getElementById('piIp').value='192.168.1.100';return false;">192.168.1.100</a></li>
+                        <li><a href="#" onclick="document.getElementById('piIp').value='192.168.1.101';return false;">192.168.1.101</a></li>
+                    </ul>
+                    <p><em>Note: Real scanning requires a backend service.</em></p>
+                `;
+                status.className = "success";
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
